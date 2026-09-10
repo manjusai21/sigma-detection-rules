@@ -1,0 +1,43 @@
+title: Encoded PowerShell Command
+id: 8e3a4b2c-1d5e-4f6a-9b0c-2d3e4f5a6b7c
+status: experimental
+description: |
+  Detects PowerShell execution with encoded commands (-enc / -EncodedCommand).
+  Attackers frequently use this technique to obfuscate malicious payloads and evade simple string-based detections.
+  Mapped to MITRE ATT&CK T1059.001 (Command and Scripting Interpreter: PowerShell).
+author: Detection Engineering Portfolio
+date: 2026/09/08
+modified: 2026/09/08
+references:
+  - https://attack.mitre.org/techniques/T1059/001/
+  - https://github.com/SigmaHQ/sigma
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_img:
+    Image|endswith:
+      - '\powershell.exe'
+      - '\pwsh.exe'
+  selection_cmd:
+    CommandLine|contains:
+      - ' -enc '
+      - ' -EncodedCommand '
+      - ' -e '
+      - ' -ec '
+  condition: selection_img and selection_cmd
+fields:
+  - CommandLine
+  - ParentImage
+  - User
+  - IntegrityLevel
+falsepositives:
+  - Legitimate administrative scripts that use encoded commands for convenience
+  - Some software installers and update mechanisms
+  - Security tools performing encoded PowerShell actions
+level: high
+tags:
+  - attack.execution
+  - attack.t1059.001
+  - attack.defense_evasion
+  - attack.t1027

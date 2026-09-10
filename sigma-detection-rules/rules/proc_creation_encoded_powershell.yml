@@ -1,0 +1,47 @@
+title: Encoded PowerShell Command
+id: 8a4f2c1e-9b3d-4e5a-a1f0-7c6d8e9b0a1f
+status: experimental
+description: |
+  Detects PowerShell process creation with encoded command flags (-enc, -encodedcommand, -e).
+  Attackers frequently use encoded PowerShell to obfuscate malicious payloads and bypass
+  basic command-line logging / AV signatures.
+references:
+  - https://attack.mitre.org/techniques/T1059/001/
+  - https://github.com/SigmaHQ/sigma
+author: Detection Engineering Portfolio
+date: 2026/09/08
+modified: 2026/09/08
+tags:
+  - attack.execution
+  - attack.t1059.001
+  - attack.defense_evasion
+  - attack.t1027
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_image:
+    Image|endswith:
+      - '\powershell.exe'
+      - '\pwsh.exe'
+  selection_encoded:
+    CommandLine|contains:
+      - ' -enc '
+      - ' -Enc '
+      - ' -ENC '
+      - ' -encodedcommand '
+      - ' -EncodedCommand '
+      - ' -e '
+      - ' -E '
+  condition: selection_image and selection_encoded
+falsepositives:
+  - Legitimate IT automation / deployment scripts that encode commands
+  - Software installers that invoke encoded PowerShell
+  - Some monitoring / backup agents
+level: high
+fields:
+  - CommandLine
+  - ParentImage
+  - ParentCommandLine
+  - User
+  - IntegrityLevel

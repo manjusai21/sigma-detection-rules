@@ -1,0 +1,45 @@
+title: Suspicious LSASS Memory Access
+id: 9d2e4f6a-1b3c-5e7f-8a0d-2c4e6f8a0b1d
+status: experimental
+description: |
+  Detects processes accessing LSASS memory – a strong indicator of credential
+  dumping (Mimikatz, ProcDump, nanodump, etc.). Maps to ATT&CK T1003.001.
+references:
+  - https://attack.mitre.org/techniques/T1003/001/
+  - https://github.com/SigmaHQ/sigma/blob/master/rules/windows/process_access/
+author: Detection Engineering Portfolio
+date: 2026/09/08
+tags:
+  - attack.credential_access
+  - attack.t1003.001
+logsource:
+  category: process_access
+  product: windows
+detection:
+  selection:
+    TargetImage|endswith: '\lsass.exe'
+    GrantedAccess|contains:
+      - '0x1010'
+      - '0x1410'
+      - '0x1438'
+      - '0x143a'
+      - '0x1fffff'
+  filter_legitimate:
+    SourceImage|endswith:
+      - '\csrss.exe'
+      - '\smss.exe'
+      - '\services.exe'
+      - '\wininit.exe'
+      - '\MsMpEng.exe'
+      - '\MsSense.exe'
+  condition: selection and not filter_legitimate
+falsepositives:
+  - Security products performing memory scanning
+  - Legitimate debugging tools (should be rare in production)
+level: high
+fields:
+  - SourceImage
+  - SourceUser
+  - TargetImage
+  - GrantedAccess
+  - CallTrace

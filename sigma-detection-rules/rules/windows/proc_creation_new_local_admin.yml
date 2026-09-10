@@ -1,0 +1,35 @@
+title: New Local Administrator Account Created
+id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+status: experimental
+description: |
+  Detects creation of a new local user account that is immediately added to the local Administrators group.
+  This is a common post-exploitation and persistence technique (ATT&CK T1136.001 + T1098).
+author: Detection Engineering Portfolio
+date: 2026/09/08
+references:
+  - https://attack.mitre.org/techniques/T1136/001/
+  - https://attack.mitre.org/techniques/T1098/
+logsource:
+  product: windows
+  service: security
+detection:
+  selection_create:
+    EventID: 4720          # A user account was created
+  selection_add_admin:
+    EventID: 4732          # A member was added to a security-enabled local group
+    TargetUserName|contains:
+      - 'Administrators'
+      - 'Администраторы'   # Russian
+      - 'Administrateurs'  # French
+  timeframe: 15s
+  condition: selection_create and selection_add_admin
+falsepositives:
+  - Legitimate IT onboarding of new administrators
+  - Domain join / imaging processes
+  - Automated provisioning tools (Intune, SCCM, Ansible)
+level: high
+tags:
+  - attack.persistence
+  - attack.t1136.001
+  - attack.privilege_escalation
+  - attack.t1098

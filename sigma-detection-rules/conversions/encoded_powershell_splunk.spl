@@ -1,0 +1,11 @@
+# Converted from Sigma rule: Encoded PowerShell Command
+# Target: Splunk (Sysmon)
+# Generated for portfolio demonstration
+
+(source="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1)
+Image="*\\powershell.exe" OR Image="*\\pwsh.exe"
+(CommandLine="* -enc *" OR CommandLine="* -Enc *" OR CommandLine="* -ENC *" 
+ OR CommandLine="* -encodedcommand *" OR CommandLine="* -EncodedCommand *"
+ OR CommandLine="* -e *" OR CommandLine="* -E *")
+| table _time, Computer, User, Image, CommandLine, ParentImage, ParentCommandLine
+| sort -_time

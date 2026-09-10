@@ -1,0 +1,37 @@
+title: New Local Administrator Account Created
+id: 3c7e9a2b-5d1f-4a8c-b0e3-9f2a1d4c6b8e
+status: experimental
+description: |
+  Detects creation of a new local user account that is immediately added to the
+  local Administrators group. This is a common persistence and privilege-escalation
+  technique used after initial access.
+references:
+  - https://attack.mitre.org/techniques/T1136/001/
+  - https://attack.mitre.org/techniques/T1078/003/
+author: Detection Engineering Portfolio
+date: 2026/09/08
+tags:
+  - attack.persistence
+  - attack.t1136.001
+  - attack.privilege_escalation
+  - attack.t1078.003
+logsource:
+  product: windows
+  service: security
+detection:
+  selection_user_created:
+    EventID: 4720
+  selection_group_add:
+    EventID: 4732
+    TargetSid: 'S-1-5-32-544'   # Local Administrators
+  timeframe: 5m
+  condition: selection_user_created and selection_group_add
+falsepositives:
+  - Legitimate domain join / imaging processes
+  - IT provisioning of new admin accounts (should be ticketed)
+level: high
+fields:
+  - TargetUserName
+  - SubjectUserName
+  - SubjectDomainName
+  - TargetSid
